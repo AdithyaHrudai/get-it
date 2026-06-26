@@ -14,8 +14,8 @@
     <groupId>com.getit</groupId>
     <artifactId>get-it</artifactId>
     <version>1.0.0</version>
-    <name>get.it</name>
-    <description>A tiny URL shortener (get.it/abc123) built with Spring Boot</description>
+    <name>snip</name>
+    <description>Snip — a tiny URL shortener (snip/abc123) built with Spring Boot</description>
 
     <properties>
         <java.version>17</java.version>

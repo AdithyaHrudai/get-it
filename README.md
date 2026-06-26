@@ -1,6 +1,6 @@
-# get.it — a tiny URL shortener 🔗
+# Snip — a tiny URL shortener 🔗
 
-Paste a long URL → get a short code back (`get.it/abc123`) → every visit to that
+Paste a long URL → get a short code back (`snip/abc123`) → every visit to that
 code redirects to the original link. Built with **Spring Boot 3**, **Spring Data
 JPA**, and **H2 / MySQL**.
 
@@ -42,8 +42,10 @@ mvn spring-boot:run
 Then open **http://localhost:8080**.
 
 > Uses an H2 file database at `./data/getit.*`, so your links survive restarts.
-> Inspect the tables at http://localhost:8080/h2-console
-> (JDBC URL `jdbc:h2:file:./data/getit`, user `sa`, no password).
+> The H2 web console is disabled by default (it must never be public on a
+> deployed app). To browse the tables locally, start with it enabled:
+> `./mvnw spring-boot:run -Dspring-boot.run.arguments=--spring.h2.console.enabled=true`
+> then open http://localhost:8080/h2-console (JDBC URL `jdbc:h2:file:./data/getit`, user `sa`, no password).
 
 ### Run against MySQL instead
 ```bash
@@ -73,7 +75,7 @@ curl -X POST http://localhost:8080/api/shorten \
 {
   "shortCode": "a3Kf9Q",
   "shortUrl": "http://localhost:8080/a3Kf9Q",
-  "brandedUrl": "get.it/a3Kf9Q",
+  "brandedUrl": "snip/a3Kf9Q",
   "longUrl": "https://spring.io/projects/spring-boot",
   "createdAt": "2026-06-25T10:00:00Z",
   "clickCount": 0

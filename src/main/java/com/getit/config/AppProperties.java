@@ -11,14 +11,14 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class AppProperties {
 
     /**
-     * Public base URL that serves redirects, e.g. https://get.it. Leave blank to
-     * auto-detect it from each incoming request (works on localhost, Render, or
-     * any host with no config). Set it only to force a fixed/vanity domain.
+     * Public base URL that serves redirects, e.g. https://snip.example. Leave
+     * blank to auto-detect it from each incoming request (works on localhost,
+     * Render, or any host with no config). Set it only to force a fixed domain.
      */
     private String baseUrl = "";
 
-    /** Vanity domain shown to users, e.g. get.it -> "get.it/abc123". */
-    private String domain = "get.it";
+    /** Vanity brand shown to users as a label, e.g. snip -> "snip/abc123". */
+    private String domain = "snip";
 
     /** Number of characters in a generated short code. */
     private int shortCodeLength = 6;

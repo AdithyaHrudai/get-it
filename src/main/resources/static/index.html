@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>get.it — URL shortener</title>
+    <title>Snip — URL shortener</title>
     <style>
         :root {
             --bg: #0f1226; --card: #1a1f3a; --accent: #6c8cff; --accent2: #00d4aa;
@@ -56,7 +56,7 @@
     </style>
 </head>
 <body>
-    <div class="brand">get<span class="dot">.</span>it</div>
+    <div class="brand">sn<span class="dot">i</span>p</div>
     <p class="tagline">Paste a long link. Get a tiny one back.</p>
 
     <div class="card">
@@ -75,7 +75,6 @@
         <div class="result" id="result">
             <a id="shortLink" href="#" target="_blank" rel="noopener"></a><br>
             <button class="copy" id="copy">Copy</button>
-            <button class="copy secondary" id="openH2" onclick="window.open('/h2-console','_blank')">View DB (H2)</button>
         </div>
         <div class="error" id="error"></div>
     </div>
@@ -139,7 +138,7 @@
                 }
                 tbody.innerHTML = items.map(i => `
                     <tr>
-                        <td><a href="${i.shortUrl}" target="_blank" rel="noopener">${i.brandedUrl}</a></td>
+                        <td><a href="${i.shortUrl}" target="_blank" rel="noopener">${i.shortUrl.replace(/^https?:\/\//, '')}</a></td>
                         <td><a href="${i.longUrl}" target="_blank" rel="noopener">${truncate(i.longUrl, 40)}</a></td>
                         <td><span class="clicks">${i.clickCount}</span></td>
                         <td><button class="del" title="Delete" onclick="del('${i.shortCode}')">✕</button></td>

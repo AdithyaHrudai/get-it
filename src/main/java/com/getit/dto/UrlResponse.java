@@ -9,7 +9,7 @@ public class UrlResponse {
 
     private final String shortCode;
     private final String shortUrl;    // clickable link that actually redirects
-    private final String brandedUrl;  // vanity display, e.g. get.it/abc123
+    private final String brandedUrl;  // vanity display label, e.g. snip/abc123
     private final String longUrl;
     private final Instant createdAt;
     private final long clickCount;
@@ -17,7 +17,7 @@ public class UrlResponse {
     /**
      * @param baseUrl the public base URL the link is served from (e.g.
      *                {@code https://get-it.onrender.com}), resolved per request
-     * @param domain  the vanity domain for display only (e.g. {@code get.it})
+     * @param domain  the vanity brand for display only (e.g. {@code snip})
      */
     public UrlResponse(UrlMapping m, String baseUrl, String domain) {
         this.shortCode = m.getShortCode();

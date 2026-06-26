@@ -11,7 +11,7 @@ public class CreateUrlRequest {
     @Size(max = 2048, message = "url is too long")
     private String url;
 
-    /** Optional custom code, e.g. "my-link" -> get.it/my-link. */
+    /** Optional custom code, e.g. "my-link" -> snip/my-link. */
     @Size(min = 3, max = 16, message = "alias must be 3-16 characters")
     @Pattern(regexp = "^[A-Za-z0-9_-]+$", message = "alias may only contain letters, digits, '-' and '_'")
     private String alias;

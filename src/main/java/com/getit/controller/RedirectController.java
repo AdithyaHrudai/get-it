@@ -37,7 +37,7 @@ public class RedirectController {
         } catch (ResourceNotFoundException e) {
             // Friendly HTML for humans who follow a dead/expired link.
             String html = "<!doctype html><html><head><meta charset='utf-8'>"
-                    + "<title>get.it — link not found</title></head>"
+                    + "<title>Snip — link not found</title></head>"
                     + "<body style=\"font-family:system-ui;text-align:center;margin-top:15vh;color:#334\">"
                     + "<h1 style=\"font-size:3rem;margin:0\">404</h1>"
                     + "<p>No short link exists for <code>/" + escape(code) + "</code>.</p>"

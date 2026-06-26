@@ -6,9 +6,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
 /**
- * get.it — a tiny URL shortener.
+ * Snip — a tiny URL shortener.
  *
- * Paste a long URL, get a short code back (get.it/abc123), and every visit to
+ * Paste a long URL, get a short code back (snip/abc123), and every visit to
  * that code redirects to the original URL.
  */
 @SpringBootApplication
