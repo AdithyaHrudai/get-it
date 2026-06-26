@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.List;
 
@@ -44,18 +45,19 @@ public class UrlRestController {
     @ResponseStatus(HttpStatus.CREATED)
     public UrlResponse shorten(@Valid @RequestBody CreateUrlRequest request) {
         UrlMapping mapping = urlService.createShortUrl(request.getUrl(), request.getAlias());
-        return new UrlResponse(mapping, properties);
+        return new UrlResponse(mapping, resolveBaseUrl(), properties.getDomain());
     }
 
     @GetMapping("/urls/{code}")
     public UrlResponse getOne(@PathVariable String code) {
-        return new UrlResponse(urlService.getByCode(code), properties);
+        return new UrlResponse(urlService.getByCode(code), resolveBaseUrl(), properties.getDomain());
     }
 
     @GetMapping("/urls")
     public List<UrlResponse> listRecent(@RequestParam(defaultValue = "20") int limit) {
+        String baseUrl = resolveBaseUrl();
         return urlService.listRecent(Math.min(Math.max(limit, 1), 100)).stream()
-                .map(m -> new UrlResponse(m, properties))
+                .map(m -> new UrlResponse(m, baseUrl, properties.getDomain()))
                 .toList();
     }
 
@@ -63,5 +65,21 @@ public class UrlRestController {
     public ResponseEntity<Void> delete(@PathVariable String code) {
         urlService.delete(code);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * The public base URL to build short links from. Prefers an explicit
+     * {@code app.base-url} (e.g. a custom vanity domain); otherwise derives it
+     * from the current request, so links are correct on localhost, Render, or
+     * anywhere else with no configuration. Proxy headers (X-Forwarded-Proto/Host)
+     * are honoured via {@code server.forward-headers-strategy}, so links served
+     * behind Render's HTTPS proxy come out as {@code https://...}.
+     */
+    private String resolveBaseUrl() {
+        String configured = properties.getBaseUrl();
+        if (configured != null && !configured.isBlank()) {
+            return configured;
+        }
+        return ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
     }
 }

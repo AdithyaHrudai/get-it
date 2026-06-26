@@ -10,8 +10,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "app")
 public class AppProperties {
 
-    /** Public base URL that actually serves redirects, e.g. http://localhost:8080. */
-    private String baseUrl = "http://localhost:8080";
+    /**
+     * Public base URL that serves redirects, e.g. https://get.it. Leave blank to
+     * auto-detect it from each incoming request (works on localhost, Render, or
+     * any host with no config). Set it only to force a fixed/vanity domain.
+     */
+    private String baseUrl = "";
 
     /** Vanity domain shown to users, e.g. get.it -> "get.it/abc123". */
     private String domain = "get.it";

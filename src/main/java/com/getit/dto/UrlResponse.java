@@ -1,6 +1,5 @@
 package com.getit.dto;
 
-import com.getit.config.AppProperties;
 import com.getit.model.UrlMapping;
 
 import java.time.Instant;
@@ -15,10 +14,15 @@ public class UrlResponse {
     private final Instant createdAt;
     private final long clickCount;
 
-    public UrlResponse(UrlMapping m, AppProperties props) {
+    /**
+     * @param baseUrl the public base URL the link is served from (e.g.
+     *                {@code https://get-it.onrender.com}), resolved per request
+     * @param domain  the vanity domain for display only (e.g. {@code get.it})
+     */
+    public UrlResponse(UrlMapping m, String baseUrl, String domain) {
         this.shortCode = m.getShortCode();
-        this.shortUrl = props.getBaseUrl() + "/" + m.getShortCode();
-        this.brandedUrl = props.getDomain() + "/" + m.getShortCode();
+        this.shortUrl = baseUrl + "/" + m.getShortCode();
+        this.brandedUrl = domain + "/" + m.getShortCode();
         this.longUrl = m.getLongUrl();
         this.createdAt = m.getCreatedAt();
         this.clickCount = m.getClickCount();
