@@ -13,4 +13,7 @@ WORKDIR /app
 COPY --from=build /app/target/get-it-1.0.0.jar app.jar
 # The platform injects $PORT; the app reads it via application.properties.
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Memory-safe startup for small (e.g. 512 MB free-tier) instances: cap the heap
+# to a share of the container memory and use the low-overhead serial GC so the
+# JVM isn't OOM-killed before Tomcat can open its port.
+ENTRYPOINT ["java", "-XX:MaxRAMPercentage=70.0", "-XX:+UseSerialGC", "-jar", "app.jar"]
