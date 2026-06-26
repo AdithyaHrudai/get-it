@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>get.it — URL shortener</title>
+    <style>
+        :root {
+            --bg: #0f1226; --card: #1a1f3a; --accent: #6c8cff; --accent2: #00d4aa;
+            --text: #e8ecff; --muted: #9aa3c7; --line: #2a3157; --danger: #ff6b81;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0; min-height: 100vh; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            background: radial-gradient(1200px 600px at 50% -10%, #25305f, var(--bg)); color: var(--text);
+            display: flex; flex-direction: column; align-items: center; padding: 40px 16px 80px;
+        }
+        .brand { font-size: 2.6rem; font-weight: 800; letter-spacing: -1px; margin: 8px 0 2px; }
+        .brand .dot { color: var(--accent2); }
+        .tagline { color: var(--muted); margin: 0 0 28px; }
+        .card {
+            width: 100%; max-width: 640px; background: var(--card); border: 1px solid var(--line);
+            border-radius: 16px; padding: 22px; box-shadow: 0 20px 50px rgba(0,0,0,.35);
+        }
+        label { display: block; font-size: .8rem; color: var(--muted); margin: 0 0 6px; }
+        input {
+            width: 100%; padding: 13px 14px; border-radius: 10px; border: 1px solid var(--line);
+            background: #11152e; color: var(--text); font-size: 1rem; outline: none;
+        }
+        input:focus { border-color: var(--accent); }
+        .row { display: flex; gap: 12px; flex-wrap: wrap; }
+        .row > div:first-child { flex: 1 1 320px; }
+        .row > div:last-child { flex: 1 1 160px; }
+        button {
+            margin-top: 16px; width: 100%; padding: 13px; border: 0; border-radius: 10px; cursor: pointer;
+            background: linear-gradient(90deg, var(--accent), var(--accent2)); color: #08102a;
+            font-weight: 700; font-size: 1rem;
+        }
+        button:active { transform: translateY(1px); }
+        .result, .error { margin-top: 16px; padding: 14px; border-radius: 10px; display: none; }
+        .result { background: #10261f; border: 1px solid #1d5a47; }
+        .error { background: #2a1622; border: 1px solid #5a1d2e; color: var(--danger); }
+        .result a { color: var(--accent2); font-weight: 700; font-size: 1.15rem; text-decoration: none; word-break: break-all; }
+        .copy { width: auto; margin: 10px 8px 0 0; padding: 8px 14px; font-size: .85rem; }
+        .secondary { background: #2a3157; color: var(--text); }
+        h2 { font-size: 1rem; color: var(--muted); margin: 34px 0 10px; width: 100%; max-width: 640px; }
+        table { width: 100%; max-width: 640px; border-collapse: collapse; background: var(--card);
+            border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+        th, td { text-align: left; padding: 11px 12px; border-bottom: 1px solid var(--line); font-size: .9rem; }
+        th { color: var(--muted); font-weight: 600; }
+        tr:last-child td { border-bottom: 0; }
+        td a { color: var(--accent); text-decoration: none; word-break: break-all; }
+        .clicks { background: #11152e; border-radius: 20px; padding: 3px 10px; font-size: .8rem; color: var(--accent2); }
+        .del { color: var(--danger); cursor: pointer; background: none; border: 0; width: auto; margin: 0; padding: 0; font-size: 1rem; }
+        .empty { color: var(--muted); text-align: center; padding: 18px; }
+    </style>
+</head>
+<body>
+    <div class="brand">get<span class="dot">.</span>it</div>
+    <p class="tagline">Paste a long link. Get a tiny one back.</p>
+
+    <div class="card">
+        <div class="row">
+            <div>
+                <label for="url">Long URL</label>
+                <input id="url" type="text" placeholder="https://example.com/some/really/long/path" autofocus>
+            </div>
+            <div>
+                <label for="alias">Custom alias (optional)</label>
+                <input id="alias" type="text" placeholder="my-link">
+            </div>
+        </div>
+        <button id="go">Shorten</button>
+
+        <div class="result" id="result">
+            <a id="shortLink" href="#" target="_blank" rel="noopener"></a><br>
+            <button class="copy" id="copy">Copy</button>
+            <button class="copy secondary" id="openH2" onclick="window.open('/h2-console','_blank')">View DB (H2)</button>
+        </div>
+        <div class="error" id="error"></div>
+    </div>
+
+    <h2>Recent links</h2>
+    <table>
+        <thead>
+            <tr><th>Short</th><th>Destination</th><th>Clicks</th><th></th></tr>
+        </thead>
+        <tbody id="list">
+            <tr><td colspan="4" class="empty">No links yet — make one above.</td></tr>
+        </tbody>
+    </table>
+
+    <script>
+        const $ = id => document.getElementById(id);
+
+        async function shorten() {
+            const url = $('url').value.trim();
+            const alias = $('alias').value.trim();
+            $('error').style.display = 'none';
+            $('result').style.display = 'none';
+            if (!url) { showError('Please enter a URL.'); return; }
+
+            const body = { url };
+            if (alias) body.alias = alias;
+            try {
+                const res = await fetch('/api/shorten', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+                if (!res.ok) { showError(data.message || 'Something went wrong.'); return; }
+                const link = $('shortLink');
+                link.textContent = data.shortUrl;
+                link.href = data.shortUrl;
+                $('result').style.display = 'block';
+                $('url').value = ''; $('alias').value = '';
+                loadRecent();
+            } catch (e) {
+                showError('Network error — is the server running?');
+            }
+        }
+
+        function showError(msg) { const el = $('error'); el.textContent = msg; el.style.display = 'block'; }
+
+        $('copy').onclick = () => {
+            navigator.clipboard.writeText($('shortLink').textContent)
+                .then(() => { $('copy').textContent = 'Copied!'; setTimeout(() => $('copy').textContent = 'Copy', 1200); });
+        };
+
+        async function loadRecent() {
+            try {
+                const res = await fetch('/api/urls?limit=20');
+                const items = await res.json();
+                const tbody = $('list');
+                if (!items.length) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="empty">No links yet — make one above.</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = items.map(i => `
+                    <tr>
+                        <td><a href="${i.shortUrl}" target="_blank" rel="noopener">${i.brandedUrl}</a></td>
+                        <td><a href="${i.longUrl}" target="_blank" rel="noopener">${truncate(i.longUrl, 40)}</a></td>
+                        <td><span class="clicks">${i.clickCount}</span></td>
+                        <td><button class="del" title="Delete" onclick="del('${i.shortCode}')">✕</button></td>
+                    </tr>`).join('');
+            } catch (e) { /* ignore */ }
+        }
+
+        async function del(code) {
+            await fetch('/api/urls/' + code, { method: 'DELETE' });
+            loadRecent();
+        }
+
+        function truncate(s, n) { return s.length > n ? s.slice(0, n) + '…' : s; }
+
+        $('go').onclick = shorten;
+        $('url').addEventListener('keydown', e => { if (e.key === 'Enter') shorten(); });
+        $('alias').addEventListener('keydown', e => { if (e.key === 'Enter') shorten(); });
+        loadRecent();
+    </script>
+</body>
+</html>
