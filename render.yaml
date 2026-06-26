@@ -1,0 +1,11 @@
+# Render Blueprint (optional, but pins the deploy config so it's reproducible).
+# If you created the service manually in the dashboard, this file is informational;
+# to have Render manage it from here, use "New + > Blueprint" and point it at the repo.
+services:
+  - type: web
+    name: snip
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /        # Render marks the service live once "/" returns 200
+    autoDeploy: true          # redeploy automatically on every push to the branch

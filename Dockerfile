@@ -13,7 +13,16 @@ WORKDIR /app
 COPY --from=build /app/target/get-it-1.0.0.jar app.jar
 # The platform injects $PORT; the app reads it via application.properties.
 EXPOSE 8080
-# Memory-safe startup for small (e.g. 512 MB free-tier) instances: cap the heap
-# to a share of the container memory and use the low-overhead serial GC so the
-# JVM isn't OOM-killed before Tomcat can open its port.
-ENTRYPOINT ["java", "-XX:MaxRAMPercentage=70.0", "-XX:+UseSerialGC", "-jar", "app.jar"]
+# Memory-safe startup for small (e.g. 512 MB free-tier) instances:
+#  * MaxRAMPercentage=45  -> ~230 MB heap, leaving room for metaspace, threads
+#    and code cache so the kernel does NOT OOM-kill the JVM before Tomcat binds.
+#  * MaxMetaspaceSize     -> bounds class metadata so total memory stays in budget.
+#  * UseSerialGC          -> lowest memory/CPU overhead GC, ideal for 1 small core.
+#  * ExitOnOutOfMemoryError-> if memory is ever exhausted, exit immediately and
+#    visibly (fast restart) instead of hanging until the port-scan times out.
+ENTRYPOINT ["java", \
+  "-XX:MaxRAMPercentage=45.0", \
+  "-XX:MaxMetaspaceSize=128m", \
+  "-XX:+UseSerialGC", \
+  "-XX:+ExitOnOutOfMemoryError", \
+  "-jar", "app.jar"]
